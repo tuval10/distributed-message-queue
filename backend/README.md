@@ -30,81 +30,40 @@ A **production-ready distributed message queue service** built with NestJS, Redi
 
 ## 📋 Quick Start
 
-### Prerequisites
+Want to get started in 5 minutes? See **[QUICK_START.md](QUICK_START.md)** for a step-by-step guide.
 
-- Node.js 18+
-- pnpm
-- Redis (local or remote)
-
-### 1. Install Dependencies
+**TL;DR:**
 
 ```bash
-pnpm install
-```
-
-### 2. Start Redis
-
-```bash
-# Using Docker (recommended)
+# 1. Start Redis
 docker run -d -p 6379:6379 --name redis redis:7-alpine
 
-# Or using Homebrew (macOS)
-brew install redis && brew services start redis
-```
-
-### 3. Configure Environment
-
-The `.env` file is already configured with defaults. Edit if needed:
-
-```bash
-# Application
-PORT=3000
-NODE_ENV=development
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-# CORS
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-```
-
-### 4. Start the Server
-
-```bash
-# Development mode (hot reload)
+# 2. Install and run
+pnpm install
 pnpm run start:dev
 
-# Production mode
-pnpm run build && pnpm run start:prod
-```
-
-### 5. Test the API
-
-```bash
-# Health check
+# 3. Test
 curl http://localhost:3000/health
-
-# Enqueue a message
-curl -X POST http://localhost:3000/api/myqueue \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Hello, World!"}'
-
-# Dequeue the message
-curl http://localhost:3000/api/myqueue?timeout=5000
-
-# Run full test suite
-./test-api.sh
 ```
 
 ## 📚 Documentation
 
-- **[Quick Start Guide](QUICK_START.md)** - Get started in 5 minutes
+### Getting Started
+
+- **[Quick Start Guide](QUICK_START.md)** - Get running in 5 minutes
+- **[Deployment Guide](DEPLOYMENT.md)** - Docker, Cloud Run, and production deployment
+
+### API Reference
+
 - **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference
+- **[Internal Controller Spec](internal_controller.md)** - Detailed API specification
+
+### Configuration & Design
+
 - **[Environment Setup](ENV_SETUP.md)** - Configuration guide
 - **[PRD](PRD.md)** - Product requirements and architecture
-- **[Internal Controller Spec](internal_controller.md)** - Detailed API specification
+- **[Technologies](Technologies.md)** - Technology stack details
+- **[Tradeoffs](Tradeoffs.md)** - Technology selection analysis and design tradeoffs
 
 ## 🏗️ Architecture
 
@@ -195,53 +154,22 @@ pnpm run test:cov
 ./test-api.sh
 ```
 
-## 🐳 Docker Deployment
+## 🚀 Deployment
 
-### Build Image
+Ready to deploy? See **[DEPLOYMENT.md](DEPLOYMENT.md)** for comprehensive deployment guides:
+
+- **Local Development** - Development setup and testing
+- **Docker Deployment** - Containerized deployment with Docker Compose
+- **Google Cloud Run** - Production deployment on GCP with auto-scaling
+- **Terraform** - Infrastructure as Code templates
+- **CI/CD** - GitHub Actions pipeline examples
+- **Monitoring** - Alerting and observability setup
+
+**Quick Docker:**
 
 ```bash
 docker build -t message-queue-api .
-```
-
-### Run Container
-
-```bash
-docker run -p 3000:3000 \
-  -e REDIS_HOST=your-redis-host \
-  -e REDIS_PORT=6379 \
-  -e NODE_ENV=production \
-  message-queue-api
-```
-
-## ☁️ Cloud Run Deployment
-
-### Prerequisites
-
-- Google Cloud Project
-- VPC with Redis (Memorystore)
-- Serverless VPC Access Connector
-
-### Deploy
-
-```bash
-# Build and push image
-docker build -t gcr.io/PROJECT_ID/message-queue-api .
-docker push gcr.io/PROJECT_ID/message-queue-api
-
-# Deploy to Cloud Run
-gcloud run deploy message-queue-api \
-  --image=gcr.io/PROJECT_ID/message-queue-api:latest \
-  --region=us-central1 \
-  --platform=managed \
-  --vpc-connector=redis-vpc-connector \
-  --set-env-vars="REDIS_HOST=10.0.0.3,REDIS_PORT=6379" \
-  --min-instances=0 \
-  --max-instances=100 \
-  --memory=512Mi \
-  --cpu=1 \
-  --timeout=60s \
-  --concurrency=80 \
-  --allow-unauthenticated
+docker run -p 3000:8080 -e REDIS_HOST=redis message-queue-api
 ```
 
 ## 📊 Performance
@@ -311,27 +239,6 @@ curl http://localhost:3000/api/stats
 - **Rate Limiting**: Optional (can be added with express-rate-limit)
 - **Authentication**: Can be added with JWT or Cloud IAM
 
-## 📝 Project Structure
-
-```
-backend/
-├── src/
-│   ├── controllers/       # API endpoints
-│   │   ├── api.controller.ts       # Simple API (PRD)
-│   │   ├── internal.controller.ts  # Full management API
-│   │   └── health.controller.ts    # Health checks
-│   ├── redis/            # Redis integration
-│   │   ├── redis.module.ts
-│   │   └── redis.service.ts
-│   ├── dto/              # Data transfer objects
-│   ├── types/            # TypeScript types
-│   ├── utils/            # Helper functions
-│   ├── app.module.ts     # Main app module
-│   └── main.ts           # Entry point
-├── test/                 # Tests
-├── .env                  # Environment variables (gitignored)
-├── .env.example          # Environment template
-└── API_DOCUMENTATION.md  # Complete API docs
 ```
 
 ## 🤝 Contributing
@@ -341,20 +248,4 @@ backend/
 3. Make your changes
 4. Add tests
 5. Submit a pull request
-
-## 📝 License
-
-MIT License - see LICENSE file for details
-
-## 🙏 Acknowledgments
-
-Built with:
-
-- [NestJS](https://nestjs.com/) - Progressive Node.js framework
-- [ioredis](https://github.com/luin/ioredis) - Redis client
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Google Cloud](https://cloud.google.com/) - Cloud infrastructure
-
----
-
-**Questions or Issues?** Check the documentation or open an issue on GitHub.
+```

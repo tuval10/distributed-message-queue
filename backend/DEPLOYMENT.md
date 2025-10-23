@@ -208,7 +208,7 @@ gcloud run deploy message-queue-api \
   --platform=managed \
   --vpc-connector=queue-connector \
   --vpc-egress=private-ranges-only \
-  --set-env-vars="REDIS_HOST=$REDIS_IP,REDIS_PORT=6379,NODE_ENV=production" \
+  --set-env-vars="REDIS_HOST=$REDIS_IP,REDIS_PORT=6379,NODE_ENV=production,CORS_ORIGINS=*" \
   --min-instances=0 \
   --max-instances=100 \
   --memory=512Mi \
@@ -217,6 +217,8 @@ gcloud run deploy message-queue-api \
   --concurrency=80 \
   --allow-unauthenticated
 ```
+
+> **Note**: The `CORS_ORIGINS=*` allows all origins for initial testing. Update this to your frontend URL after deployment (see Step 6).
 
 ### Step 5: Test Deployment
 
@@ -236,6 +238,31 @@ curl -X POST $SERVICE_URL/api/test \
 # Test dequeue
 curl "$SERVICE_URL/api/test?timeout=5000"
 ```
+
+### Step 6: Configure CORS for Frontend
+
+After deploying your frontend, update the backend's CORS configuration to allow requests from your frontend domain:
+
+```bash
+# Set your frontend URL
+export FRONTEND_URL="https://message-queue-frontend-XXXXXXXXXX.us-central1.run.app"
+
+# Update CORS_ORIGINS environment variable
+gcloud run services update message-queue-api \
+  --region=us-central1 \
+  --update-env-vars="CORS_ORIGINS=$FRONTEND_URL"
+```
+
+To allow multiple origins (e.g., production frontend and localhost for development):
+
+```bash
+# Multiple origins (comma-separated, no spaces)
+gcloud run services update message-queue-api \
+  --region=us-central1 \
+  --update-env-vars="CORS_ORIGINS=https://message-queue-frontend-XXXXXXXXXX.us-central1.run.app,http://localhost:3000"
+```
+
+**Important**: The backend requires exact origin matches when `credentials: true` is set in CORS configuration. Wildcard `*` won't work with credentials.
 
 ### Cloud Run Configuration Options
 

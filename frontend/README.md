@@ -104,44 +104,27 @@ Note: The backend doesn't expose a "list queues" endpoint, so queues are tracked
 
 ### Deploy to Google Cloud Run
 
-```bash
-# Build Docker image
-docker build -t gcr.io/PROJECT_ID/message-queue-frontend .
+The frontend container is configured to listen on port 8080 (Cloud Run's default PORT).
 
-# Push to Container Registry
-docker push gcr.io/PROJECT_ID/message-queue-frontend
+```bash
+# Export environment variables
+export PROJECT_ID="YOUR_PROJECT_ID"
+export VITE_API_BASE_URL="https://your-backend-url.run.app"
+
+# Build Docker image for linux/amd64 (required by Cloud Run)
+# Pass API URL as build argument
+docker buildx build --platform=linux/amd64 \
+  --build-arg VITE_API_BASE_URL=$VITE_API_BASE_URL \
+  -t gcr.io/$PROJECT_ID/message-queue-frontend \
+  --push .
 
 # Deploy to Cloud Run
 gcloud run deploy message-queue-frontend \
-  --image=gcr.io/PROJECT_ID/message-queue-frontend \
+  --image=gcr.io/$PROJECT_ID/message-queue-frontend \
   --platform=managed \
   --region=us-central1 \
   --allow-unauthenticated \
-  --set-env-vars="VITE_API_BASE_URL=https://your-backend-url.run.app"
+  --port=8080
 ```
 
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── config/
-│   │   └── env.ts              # Environment configuration
-│   ├── pages/
-│   │   ├── QueueDashboard.tsx  # Main dashboard
-│   │   └── QueueDetails.tsx    # Queue detail view
-│   ├── services/
-│   │   ├── api.ts              # API client
-│   │   └── mock-data.ts        # Mock data implementation
-│   ├── types/
-│   │   └── queue.ts            # TypeScript types
-│   ├── App.tsx                 # Router setup
-│   └── main.tsx                # Entry point
-├── .env                        # Environment variables
-├── package.json
-└── vite.config.ts
-```
-
-## License
-
-ISC
+**Note:** The API URL is baked into the frontend build, so you need to rebuild and redeploy if it changes.

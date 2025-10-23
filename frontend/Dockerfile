@@ -32,11 +32,14 @@ FROM nginx:alpine
 # Copy built assets from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration template
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
-# Expose port
-EXPOSE 80
+# Expose port (Cloud Run will set PORT env var)
+EXPOSE 8080
+
+# Set default PORT if not provided
+ENV PORT=8080
 
 CMD ["nginx", "-g", "daemon off;"]
 
